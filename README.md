@@ -8,9 +8,9 @@ This setup uses a **Virtual IP (VIP)** for API server redundancy and provides a 
 ## 📑 Table of Contents
 
 1. [Overview](#-overview)  
-2. [Architecture](#-architecture)
-3. [Architecture Diagram](#-architecture-diagram)
-4. [Prerequisites](#-prerequisites)  
+2. [Architecture](#%EF%B8%8F-architecture)
+3. [Architecture Diagram](#%EF%B8%8F-architecture-diagram)
+4. [Prerequisites](#%EF%B8%8F-prerequisites)  
 5. [Preparing Raspberry Pi Nodes](#-preparing-raspberry-pi-nodes)  
 6. [Talos Configuration](#-talos-configuration)  
 7. [Applying Configurations](#-applying-configurations)  
