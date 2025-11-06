@@ -64,7 +64,7 @@ Talos simplifies management, enhances security, and eliminates SSH — all syste
       │ 192.168.1.103      │   │   │ 192.168.1.104      │
       │ Worker Node        │   │   │ Worker Node        │
       └────────────────────┘   │   └────────────────────┘
-                │              │                   |
+                │              │                   │
                 └────── Shared Network (LAN) ──────┘
 ```
 
