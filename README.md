@@ -1,6 +1,6 @@
 # 🧊 Kubernetes Cluster on Talos Linux (Raspberry Pi 4)
 
-A complete, step-by-step guide for deploying a **highly available Kubernetes cluster** on **Talos Linux** using **4 Raspberry Pi 4** boards (2 control planes + 2 workers).  
+A complete, step-by-step guide for deploying a **highly available Kubernetes cluster** on **Talos Linux** using **6 Raspberry Pi 4** boards (3 control planes + 3 workers).  
 This setup uses a **Virtual IP (VIP)** for API server redundancy and provides a fully automated, immutable, and secure Kubernetes environment.
 
 ---
@@ -33,10 +33,12 @@ Talos simplifies management, enhances security, and eliminates SSH — all syste
 
 | Role | Hostname | Example IP | Description |
 |------|-----------|-------------|--------------|
-| Control Plane 1 | `talos-cp-01` | 192.168.1.101 | Primary master node |
-| Control Plane 2 | `talos-cp-02` | 192.168.1.102 | Secondary master node |
-| Worker 1 | `talos-w-01` | 192.168.1.103 | Worker node |
-| Worker 2 | `talos-w-02` | 192.168.1.104 | Worker node |
+| Control Plane 1 | `talos-cp-01` | 192.168.1.101 | Control plane node |
+| Control Plane 2 | `talos-cp-02` | 192.168.1.102 | Control plane node |
+| Control Plane 3 | `talos-cp-03` | 192.168.1.103 | Control plane node |
+| Worker 1 | `talos-w-01` | 192.168.1.104 | Worker node |
+| Worker 2 | `talos-w-02` | 192.168.1.105 | Worker node |
+| Worker 3 | `talos-w-03` | 192.168.1.106 | Worker node |
 | VIP | - | 192.168.1.110 | Virtual IP shared by control planes |
 
 ---
@@ -46,26 +48,27 @@ Talos simplifies management, enhances security, and eliminates SSH — all syste
 ```bash
                 ┌────────────────────────────────────────┐
                 │       Virtual IP (192.168.1.110)       │
-                │         Load-balanced Control Plane    │
+                │        Load-balanced Control Plane     │
                 └────────────────────────────────────────┘
                                │
-                ┌──────────────┴──────────────┐
-                │                             │
-      ┌────────────────────┐       ┌────────────────────┐
-      │ talos-cp-01        │       │ talos-cp-02        │
-      │ 192.168.1.101      │       │ 192.168.1.102      │
-      │ Control Plane Node │       │ Control Plane Node │
-      └────────────────────┘       └────────────────────┘
-                │                             │
-                ├──────────────┬──────────────┤
-                │              │              │
-      ┌────────────────────┐   │   ┌────────────────────┐
-      │ talos-w-01         │   │   │ talos-w-02         │
-      │ 192.168.1.103      │   │   │ 192.168.1.104      │
-      │ Worker Node        │   │   │ Worker Node        │
-      └────────────────────┘   │   └────────────────────┘
-                │              │                   │
-                └────── Shared Network (LAN) ──────┘
+        ┌──────────────┬──────────────┬──────────────┐
+        │              │              │              │
+┌────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
+│ talos-cp-01        │ │ talos-cp-02        │ │ talos-cp-03        │
+│ 192.168.1.101      │ │ 192.168.1.102      │ │ 192.168.1.103      │
+│ Control Plane Node │ │ Control Plane Node │ │ Control Plane Node │
+└────────────────────┘ └────────────────────┘ └────────────────────┘
+        │              │              │              │
+        ├──────────────┬──────────────┬──────────────┤
+        │              │              │              │
+┌────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
+│ talos-w-01         │ │ talos-w-02         │ │ talos-w-03         │
+│ 192.168.1.104      │ │ 192.168.1.105      │ │ 192.168.1.106      │
+│ Worker Node        │ │ Worker Node        │ │ Worker Node        │
+└────────────────────┘ └────────────────────┘ └────────────────────┘
+        │              │              │             │
+        └────────── Shared Network (LAN) ───────────┘
+
 ```
 
 ---
@@ -74,7 +77,7 @@ Talos simplifies management, enhances security, and eliminates SSH — all syste
 
 Ensure the following before proceeding:
 
-- 4x Raspberry Pi 4 (4 GB or 8 GB RAM)
+- 6x Raspberry Pi 4 (4 GB or 8 GB RAM)
 - DHCP server for initial IP assignment
 - [Talosctl](https://www.talos.dev/v1.7/introduction/getting-started/#talosctl) and [kubectl](https://kubernetes.io/docs/tasks/tools/) installed on your system (Linux/macOS/Windows)
 - Local workstation with access to the same LAN
@@ -160,8 +163,10 @@ Repeat for each node, adjusting hostnames and IPs.
 ```bash
 talosctl machineconfig patch controlplane.yaml --patch @controlplane-patch-1.yaml --output controlplane-1.yaml
 talosctl machineconfig patch controlplane.yaml --patch @controlplane-patch-2.yaml --output controlplane-2.yaml
+talosctl machineconfig patch controlplane.yaml --patch @controlplane-patch-3.yaml --output controlplane-3.yaml
 talosctl machineconfig patch worker.yaml --patch @worker-patch-1.yaml --output worker-1.yaml
 talosctl machineconfig patch worker.yaml --patch @worker-patch-2.yaml --output worker-2.yaml
+talosctl machineconfig patch worker.yaml --patch @worker-patch-3.yaml --output worker-3.yaml
 ```
 
 ---
@@ -173,8 +178,10 @@ Apply generated configuration files to each node:
 ```bash
 talosctl apply-config --insecure --nodes <dhcp-ip> --file controlplane-1.yaml
 talosctl apply-config --insecure --nodes <dhcp-ip> --file controlplane-2.yaml
+talosctl apply-config --insecure --nodes <dhcp-ip> --file controlplane-3.yaml
 talosctl apply-config --insecure --nodes <dhcp-ip> --file worker-1.yaml
 talosctl apply-config --insecure --nodes <dhcp-ip> --file worker-2.yaml
+talosctl apply-config --insecure --nodes <dhcp-ip> --file worker-3.yaml
 ```
 
 Merge configuration:
@@ -190,7 +197,7 @@ talosctl config merge ./talosconfig
 Set endpoints and bootstrap control plane:
 
 ```bash
-talosctl config endpoint 192.168.1.101 192.168.1.102
+talosctl config endpoint 192.168.1.101 192.168.1.102 192.168.1.103
 talosctl bootstrap --nodes 192.168.1.101
 ```
 
