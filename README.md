@@ -214,6 +214,6 @@ You should see all four nodes (`Ready` state).
 
 **Przemyslaw Pradela**  
 
-- 💼 GitHub: [@ppradela](https://github.com/ppradela)  
-- ✉️ Email: [przemyslaw.pradela@pradela.ovh](mailto:przemyslaw.pradela@gmail.com?subject=Talos%20Kubernetes%20Cluster%20Guide)  
+- 💼 GitHub: [@ppradela](https://github.com/ppradela)
 - 🔗 LinkedIn: [przemyslaw-pradela](https://www.linkedin.com/in/przemyslaw-pradela)
+
