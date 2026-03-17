@@ -1,0 +1,19 @@
+machine:
+  network:
+    hostname: talos-cp-03
+    nameservers:
+      - 1.1.1.1
+    interfaces:
+      - interface: end0
+        addresses:
+          - 192.168.1.103/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.1.1
+        vip:
+          ip: 192.168.1.110
+  install:
+    disk: /dev/mmcblk0
+  time:
+    servers:
+      - time.cloudflare.com

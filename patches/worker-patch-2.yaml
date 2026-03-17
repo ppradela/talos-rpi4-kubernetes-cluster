@@ -1,0 +1,17 @@
+machine:
+  network:
+    hostname: talos-wr-02
+    nameservers:
+      - 1.1.1.1
+    interfaces:
+      - interface: end0
+        addresses:
+          - 192.168.1.105/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.1.1
+  install:
+    disk: /dev/mmcblk0
+  time:
+    servers:
+      - time.cloudflare.com
