@@ -241,9 +241,9 @@ NAME          STATUS   ROLES           AGE   VERSION   INTERNAL-IP
 talos-cp-01   Ready    control-plane   5m    v1.xx.x   192.168.1.101
 talos-cp-02   Ready    control-plane   5m    v1.xx.x   192.168.1.102
 talos-cp-03   Ready    control-plane   5m    v1.xx.x   192.168.1.103
-talos-wr-01    Ready    <none>          5m    v1.xx.x   192.168.1.104
-talos-wr-02    Ready    <none>          5m    v1.xx.x   192.168.1.105
-talos-wr-03    Ready    <none>          5m    v1.xx.x   192.168.1.106
+talos-wr-01   Ready    <none>          5m    v1.xx.x   192.168.1.104
+talos-wr-02   Ready    <none>          5m    v1.xx.x   192.168.1.105
+talos-wr-03   Ready    <none>          5m    v1.xx.x   192.168.1.106
 ```
 
 ---
