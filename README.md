@@ -53,12 +53,6 @@
 
 ---
 
-## Architecture Diagram
-
-![Architecture Diagram](diagram.png)
-
----
-
 ## File Structure
 
 ```
