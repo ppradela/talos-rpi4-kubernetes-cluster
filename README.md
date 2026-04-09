@@ -78,7 +78,7 @@ repository/
 - 6× Raspberry Pi 4 (4 GB or 8 GB RAM)
 - SD cards (16 GB minimum per node)
 - DHCP server for initial IP assignment
-- [`talosctl`](https://www.talos.dev/v1.12/introduction/getting-started/#talosctl), [`kubectl`](https://kubernetes.io/docs/tasks/tools/), and [`cilium` CLI](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/#install-the-cilium-cli) installed on your workstation
+- [`talosctl`](https://www.talos.dev/v1.12/introduction/getting-started/#talosctl), [`kubectl`](https://kubernetes.io/docs/tasks/tools/), [`helm`](https://helm.sh/docs/intro/install/), and [`cilium` CLI](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/#install-the-cilium-cli) installed on your workstation
 - Local workstation with access to the same LAN
 
 ---
@@ -217,10 +217,17 @@ After bootstrapping, nodes will be in a `NotReady` state waiting for a CNI. Retr
 talosctl kubeconfig --nodes 192.168.1.101
 ```
 
-Install Cilium with kube-proxy replacement and GatewayAPI support:
+Install Cilium with kube-proxy replacement and GatewayAPI support using Helm:
 
 ```bash
-cilium install \
+helm repo add cilium https://helm.cilium.io/
+helm repo update
+
+helm install \
+    cilium \
+    cilium/cilium \
+    --version 1.18.0 \
+    --namespace kube-system \
     --set ipam.mode=kubernetes \
     --set kubeProxyReplacement=true \
     --set securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}" \
