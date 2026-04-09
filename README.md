@@ -78,7 +78,7 @@ repository/
 - 6× Raspberry Pi 4 (4 GB or 8 GB RAM)
 - SD cards (16 GB minimum per node)
 - DHCP server for initial IP assignment
-- [`talosctl`](https://www.talos.dev/v1.12/introduction/getting-started/#talosctl), [`kubectl`](https://kubernetes.io/docs/tasks/tools/), [`helm`](https://helm.sh/docs/intro/install/), and [`cilium` CLI](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/#install-the-cilium-cli) installed on your workstation
+- [`talosctl`](https://www.talos.dev/v1.12/introduction/getting-started/#talosctl), [`kubectl`](https://kubernetes.io/docs/tasks/tools/), and [`helm`](https://helm.sh/docs/intro/install/) installed on your workstation
 - Local workstation with access to the same LAN
 
 ---
@@ -244,7 +244,7 @@ helm install \
 Verify Cilium is running:
 
 ```bash
-cilium status --wait
+kubectl get pods -n kube-system -l app.kubernetes.io/name=cilium
 ```
 
 ---
