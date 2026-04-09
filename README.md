@@ -251,13 +251,7 @@ kubectl get pods -n kube-system -l k8s-app=cilium
 
 ## Step 10 — Access Kubernetes
 
-Retrieve the kubeconfig (skip if already done in the previous step):
-
-```bash
-talosctl kubeconfig --nodes 192.168.1.101
-```
-
-If managing multiple clusters, save to a named file:
+If managing multiple clusters, save the kubeconfig to a named file:
 
 ```bash
 talosctl kubeconfig talos-cluster --nodes 192.168.1.101
