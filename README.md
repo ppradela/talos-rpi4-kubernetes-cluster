@@ -244,7 +244,7 @@ helm install \
 Verify Cilium is running:
 
 ```bash
-kubectl get pods -n kube-system -l app.kubernetes.io/name=cilium
+kubectl get pods -n kube-system -l k8s-app=cilium
 ```
 
 ---
