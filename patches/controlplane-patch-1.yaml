@@ -2,7 +2,7 @@ machine:
   network:    
     nameservers:
       - 1.1.1.1
-      - 1.0.0.1
+      - 8.8.8.8
     interfaces:
       - interface: end0
         addresses:
@@ -17,6 +17,7 @@ machine:
   time:
     servers:
       - time.cloudflare.com
+      - time.google.com
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
