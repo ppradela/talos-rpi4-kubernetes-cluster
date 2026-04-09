@@ -2,9 +2,10 @@
 
 > **Highly available Kubernetes cluster on Talos Linux — 3 control planes + 3 workers on Raspberry Pi 4, with Virtual IP for API server redundancy. Immutable OS, no SSH, fully API-driven.**
 
-![Talos](https://img.shields.io/badge/Talos-v1.11.3-orange)
+![Talos](https://img.shields.io/badge/Talos-v1.12.6-orange)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-latest-326CE5?logo=kubernetes)
 ![Architecture](https://img.shields.io/badge/arch-ARM64-lightgrey)
+![CNI](https://img.shields.io/badge/CNI-Cilium-F8C517?logo=cilium)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ---
@@ -15,6 +16,7 @@
 - **Immutable OS** — Talos Linux: no SSH, no shell, no package manager — all management through `talosctl` API
 - **Static networking** — each node has a fixed IP, hostname, DNS, and NTP configured via machine config patches
 - **Virtual IP failover** — control plane VIP (`192.168.1.110`) automatically moves between healthy nodes
+- **Cilium CNI with GatewayAPI** — replaces default Flannel and kube-proxy with Cilium for advanced networking
 - **Declarative configuration** — all node configs generated from a single secrets file and per-node YAML patches
 - **Reproducible setup** — patch files for all 6 nodes included in this repository
 
@@ -58,6 +60,7 @@
 ```
 repository/
 ├── patches/
+│   ├── cilium.yaml                 # Cilium CNI — disables default CNI and kube-proxy
 │   ├── controlplane-patch-1.yaml   # talos-cp-01 — 192.168.1.101
 │   ├── controlplane-patch-2.yaml   # talos-cp-02 — 192.168.1.102
 │   ├── controlplane-patch-3.yaml   # talos-cp-03 — 192.168.1.103
@@ -75,7 +78,7 @@ repository/
 - 6× Raspberry Pi 4 (4 GB or 8 GB RAM)
 - SD cards (16 GB minimum per node)
 - DHCP server for initial IP assignment
-- [`talosctl`](https://www.talos.dev/v1.11/introduction/getting-started/#talosctl) and [`kubectl`](https://kubernetes.io/docs/tasks/tools/) installed on your workstation
+- [`talosctl`](https://www.talos.dev/v1.12/introduction/getting-started/#talosctl), [`kubectl`](https://kubernetes.io/docs/tasks/tools/), and [`cilium` CLI](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/#install-the-cilium-cli) installed on your workstation
 - Local workstation with access to the same LAN
 
 ---
@@ -95,7 +98,7 @@ This ensures the Pi boots correctly from SD card.
 Download the Talos ARM64 image:
 
 ```bash
-wget https://factory.talos.dev/image/ee21ef4a5ef808a9b7484cc0dda0f25075021691c8c09a276591eedb638ea1f9/v1.11.3/metal-arm64.raw.xz
+wget https://factory.talos.dev/image/ee21ef4a5ef808a9b7484cc0dda0f25075021691c8c09a276591eedb638ea1f9/v1.12.6/metal-arm64.raw.xz
 ```
 
 Flash using **Raspberry Pi Imager** (select the `.raw.xz` file directly) or with `dd`:
@@ -121,16 +124,19 @@ talosctl gen secrets -o secrets.yaml
 
 ## Step 4 — Generate Base Configs
 
+Generate configs with the Cilium patch to disable the default CNI and kube-proxy:
+
 ```bash
-talosctl gen config --with-secrets secrets.yaml democluster https://192.168.1.110:6443
+talosctl gen config --with-secrets secrets.yaml democluster https://192.168.1.110:6443 \
+  --config-patch @patches/cilium.yaml
 ```
 
 This generates:
 
 | File | Purpose |
 |------|---------|
-| `controlplane.yaml` | Base config for all control plane nodes |
-| `worker.yaml` | Base config for all worker nodes |
+| `controlplane.yaml` | Base config for all control plane nodes (Flannel and kube-proxy disabled) |
+| `worker.yaml` | Base config for all worker nodes (Flannel and kube-proxy disabled) |
 | `talosconfig` | Client config for `talosctl` |
 
 ---
@@ -203,9 +209,42 @@ talosctl bootstrap --nodes 192.168.1.101
 
 ---
 
-## Step 9 — Access Kubernetes
+## Step 9 — Install Cilium CNI with GatewayAPI
 
-Retrieve the kubeconfig:
+After bootstrapping, nodes will be in a `NotReady` state waiting for a CNI. Retrieve the kubeconfig first:
+
+```bash
+talosctl kubeconfig --nodes 192.168.1.101
+```
+
+Install Cilium with kube-proxy replacement and GatewayAPI support:
+
+```bash
+cilium install \
+    --set ipam.mode=kubernetes \
+    --set kubeProxyReplacement=true \
+    --set securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}" \
+    --set securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}" \
+    --set cgroup.autoMount.enabled=false \
+    --set cgroup.hostRoot=/sys/fs/cgroup \
+    --set k8sServiceHost=localhost \
+    --set k8sServicePort=7445 \
+    --set gatewayAPI.enabled=true \
+    --set gatewayAPI.enableAlpn=true \
+    --set gatewayAPI.enableAppProtocol=true
+```
+
+Verify Cilium is running:
+
+```bash
+cilium status --wait
+```
+
+---
+
+## Step 10 — Access Kubernetes
+
+Retrieve the kubeconfig (skip if already done in the previous step):
 
 ```bash
 talosctl kubeconfig --nodes 192.168.1.101

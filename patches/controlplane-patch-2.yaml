@@ -1,8 +1,8 @@
 machine:
   network:
-    hostname: talos-cp-02
     nameservers:
       - 1.1.1.1
+      - 1.0.0.1
     interfaces:
       - interface: end0
         addresses:
@@ -17,3 +17,8 @@ machine:
   time:
     servers:
       - time.cloudflare.com
+---
+apiVersion: v1alpha1
+kind: HostnameConfig
+auto: off
+hostname: talos-cp-02
